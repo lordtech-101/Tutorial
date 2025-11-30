@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Webcode Tutorial</title>
+
+<style>
+    body {
+        margin: 0;
+        background: #111;
+        color: #fff;
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+    #loginScreen, #videoSection {
+        display: none;
+        margin-top: 30px;
+    }
+
+    h1 {
+        margin-bottom: 20px;
+    }
+
+    .video-container {
+        position: relative;
+        width: 90vw;
+        max-width: 720px;
+        margin: 10px auto;
+        height: 0;
+        padding-bottom: 56.25%;
+    }
+
+    .video-container iframe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    button {
+        background:#0077ff;
+        color:#fff;
+        border:none;
+        padding:10px 14px;
+        margin:5px;
+        border-radius:5px;
+        cursor:pointer;
+    }
+
+    button:hover { background:#005fcc; }
+
+    .video-list-item {
+        margin: 10px auto;
+        padding: 10px;
+        width: 90%;
+        background:#222;
+        border-radius:6px;
+    }
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+    <h1>Enter Page Password</h1>
+    <input type="password" id="loginPass">
+    <button onclick="enterSite()">Login</button>
+</div>
+
+<!-- MAIN PAGE -->
+<div id="mainContent" style="display:none;">
+    <h1>Webcode Tutorial</h1>
+
+    <button onclick="unlockVideos()">Unlock Videos</button>
+
+    <div id="videoSection">
+        <h2>Videos</h2>
+        <div id="videosList"></div>
+
+        <button onclick="addVideo()">Add Video</button>
+        <button onclick="removeVideo()">Delete Video</button>
+    </div>
+</div>
+
+<script>
+const LOGIN_PASSWORD = "@webcode.#";
+const UNLOCK_PASSWORD = "webcodE.#";
+const EDIT_PASSWORD = "tut0rIal25webc0de";
+
+let videos = [];
+
+function enterSite() {
+    let pass = document.getElementById("loginPass").value;
+    if(pass === LOGIN_PASSWORD){
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+    } else {
+        alert("Wrong password!");
+    }
+}
+
+function unlockVideos(){
+    let pass = prompt("Enter Unlock Code:");
+    if(pass === UNLOCK_PASSWORD){
+        document.getElementById("videoSection").style.display = "block";
+    } else {
+        alert("Incorrect unlock code!");
+    }
+}
+
+function renderVideos(){
+    let list = document.getElementById("videosList");
+    list.innerHTML = "";
+
+    videos.forEach((video, index) => {
+        list.innerHTML += `
+            <div class="video-list-item">
+                <h3>${video.title}</h3>
+                <div class="video-container">
+                    <iframe allowfullscreen src="${video.link}"></iframe>
+                </div>
+            </div>`;
+    });
+}
+
+function addVideo(){
+    let pass = prompt("Password to Add/Delete:");
+    if(pass !== EDIT_PASSWORD) return alert("Incorrect password!");
+
+    let title = prompt("Enter video name:");
+    let link = prompt("Paste video link (URL):");
+
+    if(title && link){
+        videos.push({title, link});
+        renderVideos();
+        alert("Video added!");
+    }
+}
+
+function removeVideo(){
+    let pass = prompt("Password to Add/Delete:");
+    if(pass !== EDIT_PASSWORD) return alert("Incorrect password!");
+
+    let index = prompt("Enter video number to delete (1 to " + videos.length + ")");
+
+    if(index && index > 0 && index <= videos.length){
+        videos.splice(index - 1, 1);
+        renderVideos();
+        alert("Video deleted!");
+    }
+}
+</script>
+
+<script>
+// Show login screen at start
+document.getElementById("loginScreen").style.display = "block";
+</script>
+
+</body>
+</html>
