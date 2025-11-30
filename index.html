@@ -1,161 +1,255 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Webcode Tutorial</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Watch Only — Scrollable Videos</title>
 
-<style>
-    body {
-        margin: 0;
-        background: #111;
-        color: #fff;
-        text-align: center;
-        font-family: Arial, sans-serif;
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; frame-src https://streamable.com https://*.streamable.com https://cdn.streamable.com https://cdn*.streamable.com https://embed.streamable.com; connect-src 'self' https:; object-src 'none';">
+
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --muted:#9aa0a6;
+      --max-width:1200px;
     }
-    #loginScreen, #videoSection {
-        display: none;
-        margin-top: 30px;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      background:linear-gradient(180deg,#0b0b0b,#111);
+      color:#fff;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.2;
+      scroll-behavior: smooth;
+      overflow-y: auto;
+    }
+    header{
+      position:sticky;
+      top:0;
+      z-index:40;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(6,6,6,0.65), rgba(6,6,6,0.35));
+      padding:10px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    header h1{ margin:0; font-size:16px; font-weight:600; color:#e6eef8; }
+
+    .player {
+      height:100vh;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      scroll-snap-align: start;
+      position:relative;
+    }
+    .player:nth-child(odd){ background:linear-gradient(180deg,#030303,#0b0b0b); }
+    .player:nth-child(even){ background:linear-gradient(180deg,#07070a,#0f0f12); }
+    .player-inner{
+      width:100%;
+      max-width:var(--max-width);
+      height:100%;
+      background:#000;
+      border-radius:10px;
+      overflow:hidden;
+      box-shadow:0 6px 30px rgba(0,0,0,0.6);
+      display:flex;
+      position:relative;
+    }
+    iframe.videoFrame{
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
     }
 
-    h1 {
-        margin-bottom: 20px;
+    .fallback {
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.6));
+      color:#fff;
+      text-align:center;
+      padding:18px;
+      font-size:16px;
+      gap:8px;
+      flex-direction:column;
+    }
+    .fallback a {
+      color:#fff;
+      text-decoration:underline;
     }
 
-    .video-container {
-        position: relative;
-        width: 90vw;
-        max-width: 720px;
-        margin: 10px auto;
-        height: 0;
-        padding-bottom: 56.25%;
+    .muted{ color:var(--muted); font-size:13px; text-align:center; padding:12px 16px; }
+    html { scroll-snap-type: y mandatory; }
+    @media (max-width:640px){ header h1{ font-size:14px } .player { padding:10px } }
+
+    /* Login overlay */
+    #loginOverlay, .videoLock {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.95);
+      z-index:100;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      color:#fff;
     }
-
-    .video-container iframe {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border: none;
+    #loginOverlay input, .videoLock input {
+      padding:8px 12px;
+      font-size:16px;
+      border-radius:6px;
+      border:none;
+      margin-top:8px;
     }
-
-    button {
-        background:#0077ff;
-        color:#fff;
-        border:none;
-        padding:10px 14px;
-        margin:5px;
-        border-radius:5px;
-        cursor:pointer;
+    #loginOverlay button, .videoLock button {
+      margin-top:12px;
+      padding:8px 14px;
+      font-size:16px;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      background:#1e90ff;
+      color:#fff;
     }
-
-    button:hover { background:#005fcc; }
-
-    .video-list-item {
-        margin: 10px auto;
-        padding: 10px;
-        width: 90%;
-        background:#222;
-        border-radius:6px;
+    .videoLock {
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      z-index:50;
     }
-
-</style>
+  </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="loginScreen">
-    <h1>Enter Page Password</h1>
-    <input type="password" id="loginPass">
-    <button onclick="enterSite()">Login</button>
-</div>
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay">
+    <h2>Enter Site Password</h2>
+    <input type="password" id="sitePassword" placeholder="Password">
+    <button id="loginBtn">Unlock</button>
+    <div style="margin-top:8px;font-size:14px;color:#ccc;"></div>
+  </div>
 
-<!-- MAIN PAGE -->
-<div id="mainContent" style="display:none;">
-    <h1>Webcode Tutorial</h1>
+  <header>
+    <h1>Webcode Tutorial, scroll for more lessons!</h1>
+  </header>
 
-    <button onclick="unlockVideos()">Unlock Videos</button>
+  <main id="app" role="main">
+    <!-- VIDEO 1 -->
+    <section class="player" aria-label="Video 1">
+      <div class="player-inner">
+        <iframe class="videoFrame" id="video-1" src="https://streamable.com/e/j6dz8x" title="Embedded video 1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+        <div class="fallback" id="fallback-1" aria-hidden="true">
+          <div>The embedded video didn't load. You can open it directly:</div>
+          <a href="https://streamable.com/e/j6dz8x" target="_blank" rel="noopener">Open video in a new tab</a>
+          <div style="font-size:13px; color:#c0c5cc">If this keeps happening, check the browser console for CSP or network errors.</div>
+        </div>
+        <!-- VIDEO LOCK -->
+        <div class="videoLock" id="lock-1">
+          <h3>Enter Video Password</h3>
+          <input type="password" id="videoPass1" placeholder="Video Password">
+          <button data-video="1">Unlock Video</button>
+          <div style="margin-top:6px;font-size:13px;color:#ccc;"></div>
+        </div>
+      </div>
+    </section>
 
-    <div id="videoSection">
-        <h2>Videos</h2>
-        <div id="videosList"></div>
+    <!-- VIDEO 2 -->
+    <section class="player" aria-label="Video 2">
+      <div class="player-inner">
+        <iframe class="videoFrame" id="video-2" src="https://streamable.com/e/j6dz8x" title="Embedded video 2" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+        <div class="fallback" id="fallback-2" aria-hidden="true">
+          <div>The embedded video didn't load. You can open it directly:</div>
+          <a href="https://streamable.com/e/j6dz8x" target="_blank" rel="noopener">Open video in a new tab</a>
+          <div style="font-size:13px; color:#c0c5cc">If this keeps happening, check the browser console for CSP or network errors.</div>
+        </div>
+        <!-- VIDEO LOCK -->
+        <div class="videoLock" id="lock-2">
+          <h3>Enter Video Password</h3>
+          <input type="password" id="videoPass2" placeholder="Video Password">
+          <button data-video="2">Unlock Video</button>
+          <div style="margin-top:6px;font-size:13px;color:#ccc;"></div>
+        </div>
+      </div>
+    </section>
 
-        <button onclick="addVideo()">Add Video</button>
-        <button onclick="removeVideo()">Delete Video</button>
-    </div>
-</div>
+    <!-- VIDEO 3 -->
+    <section class="player" aria-label="Video 3">
+      <div class="player-inner">
+        <iframe class="videoFrame" id="video-3" src="https://streamable.com/e/j6dz8x" title="Embedded video 3" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+        <div class="fallback" id="fallback-3" aria-hidden="true">
+          <div>The embedded video didn't load. You can open it directly:</div>
+          <a href="https://streamable.com/e/j6dz8x" target="_blank" rel="noopener">Open video in a new tab</a>
+          <div style="font-size:13px; color:#c0c5cc">If this keeps happening, check the browser console for CSP or network errors.</div>
+        </div>
+        <!-- VIDEO LOCK -->
+        <div class="videoLock" id="lock-3">
+          <h3>Enter Video Password</h3>
+          <input type="password" id="videoPass3" placeholder="Video Password">
+          <button data-video="3">Unlock Video</button>
+          <div style="margin-top:6px;font-size:13px;color:#ccc;"></div>
+        </div>
+      </div>
+    </section>
 
-<script>
-const LOGIN_PASSWORD = "@webcode.#";
-const UNLOCK_PASSWORD = "webcodE.#";
-const EDIT_PASSWORD = "tut0rIal25webc0de";
+    <p class="muted">Scroll to move between full-screen videos.</p>
+  </main>
 
-let videos = [];
+  <script>
+    (function () {
+      const ids = [1,2,3];
+      ids.forEach(n => {
+        const iframe = document.getElementById('video-' + n);
+        const fallback = document.getElementById('fallback-' + n);
+        const t = setTimeout(() => {
+          if (fallback) { fallback.style.display = 'flex'; fallback.setAttribute('aria-hidden','false'); }
+        },7000);
+        iframe.addEventListener('load',()=>{ clearTimeout(t); if(fallback){ fallback.style.display='none'; fallback.setAttribute('aria-hidden','true'); }});
+      });
 
-function enterSite() {
-    let pass = document.getElementById("loginPass").value;
-    if(pass === LOGIN_PASSWORD){
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
-    } else {
-        alert("Wrong password!");
-    }
-}
+      // Disable right-click / basic protection
+      document.addEventListener('contextmenu', e => e.preventDefault(), {passive:false});
+      window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue = ''; });
 
-function unlockVideos(){
-    let pass = prompt("Enter Unlock Code:");
-    if(pass === UNLOCK_PASSWORD){
-        document.getElementById("videoSection").style.display = "block";
-    } else {
-        alert("Incorrect unlock code!");
-    }
-}
+      // SITE LOGIN
+      const loginOverlay = document.getElementById('loginOverlay');
+      const loginBtn = document.getElementById('loginBtn');
+      loginBtn.addEventListener('click', () => {
+        const pw = document.getElementById('sitePassword').value;
+        if(pw === "@webcode.#") {
+          loginOverlay.style.display = 'none';
+        } else {
+          alert('Incorrect site password!');
+        }
+      });
 
-function renderVideos(){
-    let list = document.getElementById("videosList");
-    list.innerHTML = "";
-
-    videos.forEach((video, index) => {
-        list.innerHTML += `
-            <div class="video-list-item">
-                <h3>${video.title}</h3>
-                <div class="video-container">
-                    <iframe allowfullscreen src="${video.link}"></iframe>
-                </div>
-            </div>`;
-    });
-}
-
-function addVideo(){
-    let pass = prompt("Password to Add/Delete:");
-    if(pass !== EDIT_PASSWORD) return alert("Incorrect password!");
-
-    let title = prompt("Enter video name:");
-    let link = prompt("Paste video link (URL):");
-
-    if(title && link){
-        videos.push({title, link});
-        renderVideos();
-        alert("Video added!");
-    }
-}
-
-function removeVideo(){
-    let pass = prompt("Password to Add/Delete:");
-    if(pass !== EDIT_PASSWORD) return alert("Incorrect password!");
-
-    let index = prompt("Enter video number to delete (1 to " + videos.length + ")");
-
-    if(index && index > 0 && index <= videos.length){
-        videos.splice(index - 1, 1);
-        renderVideos();
-        alert("Video deleted!");
-    }
-}
-</script>
-
-<script>
-// Show login screen at start
-document.getElementById("loginScreen").style.display = "block";
-</script>
-
+      // VIDEO UNLOCK
+      ids.forEach(n => {
+        const btn = document.querySelector(`#lock-${n} button`);
+        btn.addEventListener('click', () => {
+          const input = document.getElementById('videoPass'+n).value;
+          if(input === "webcodE.#") {
+            document.getElementById('lock-'+n).style.display = 'none';
+          } else {
+            alert('Incorrect video password!');
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
