@@ -6,94 +6,204 @@
   <title>Webtutorial</title>
 
   <style>
-    body {
-      margin:0;
-      background:black;
-      overflow:hidden;
-      font-family:Arial;
-      color:white;
-    }
+    /* ===== ROOT RESET ===== */
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-    /* Vertical TikTok swipe */
-    #slider {
-      height:100vh;
-      overflow-y:scroll;
-      scroll-snap-type:y mandatory;
-      scroll-behavior:smooth;
-    }
+body{
+  margin:0;
+  background:linear-gradient(180deg,#000814,#001d3d);
+  overflow:hidden;
+  font-family: "Inter", Arial, sans-serif;
+  color:white;
+}
 
-    .panel {
-      height:100vh;
-      width:100%;
-      position:relative;
-      scroll-snap-align:start;
-    }
+/* ===== SCROLL CONTAINER ===== */
+#slider{
+  height:100vh;
+  overflow-y:scroll;
+  scroll-snap-type:y mandatory;
+  scroll-behavior:smooth;
+}
 
-    .player-inner {
-      width:100%;
-      height:100%;
-      position:relative;
-      overflow:hidden;
-    }
+/* Hide scrollbar */
+#slider::-webkit-scrollbar{
+  width:0;
+}
 
-    iframe {
-      width:100%;
-      height:100%;
-      border:0;
-    }
+/* ===== PANEL ===== */
+.panel{
+  height:100vh;
+  width:100%;
+  position:relative;
+  scroll-snap-align:start;
+  background:black;
+}
 
-    /* Bottom-left title */
-    .video-title {
-      position:absolute;
-      bottom:20px;
-      left:20px;
-      background:rgba(0,0,0,0.4);
-      padding:8px 12px;
-      font-size:22px;
-      border-radius:6px;
-    }
+/* ===== VIDEO WRAPPER ===== */
+.player-inner{
+  width:100%;
+  height:100%;
+  position:relative;
+  overflow:hidden;
+  background:black;
+}
 
-    /* Lock overlay */
-    .videoLock {
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,0.9);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      z-index:20;
-    }
+iframe{
+  width:100%;
+  height:100%;
+  border:0;
+}
 
-    .videoLock input, .videoLock button {
-      padding:10px;
-      margin-top:10px;
-      font-size:16px;
-      border:none;
-      border-radius:6px;
-    }
-    .videoLock button {
-      background:#1e90ff;
-      color:white;
-    }
+/* ===== VIDEO TITLE ===== */
+.video-title{
+  position:absolute;
+  bottom:24px;
+  left:20px;
+  right:20px;
+  padding:12px 16px;
+  font-size:20px;
+  font-weight:600;
+  letter-spacing:.4px;
+  background:linear-gradient(
+    to right,
+    rgba(0,0,0,0.65),
+    rgba(0,0,0,0.25)
+  );
+  backdrop-filter:blur(6px);
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
 
-    /* Site login */
-    #loginOverlay {
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.95);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      z-index:999;
-    }
+/* ===== VIDEO LOCK ===== */
+.videoLock{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at top, rgba(30,144,255,0.15), transparent),
+    rgba(0,0,0,0.92);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:20;
+  text-align:center;
+  padding:24px;
+}
 
-    h9 {
-      font-family: times new roman;
-      text-align: right;
-      font-size: 20px;
-    }
+.videoLock h3{
+  margin:0 0 10px;
+  font-size:24px;
+  font-weight:600;
+}
+
+.videoLock input{
+  width:260px;
+  max-width:90%;
+  padding:14px;
+  margin-top:10px;
+  font-size:16px;
+  border:none;
+  border-radius:12px;
+  outline:none;
+  background:rgba(255,255,255,0.12);
+  color:white;
+  text-align:center;
+}
+
+.videoLock input::placeholder{
+  color:rgba(255,255,255,0.6);
+}
+
+.videoLock button{
+  width:260px;
+  max-width:90%;
+  padding:14px;
+  margin-top:14px;
+  font-size:16px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#1e90ff,#2563eb);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 10px 30px rgba(30,144,255,0.45);
+  transition:.3s;
+}
+
+.videoLock button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 36px rgba(30,144,255,0.65);
+}
+
+/* ===== SITE LOGIN ===== */
+#loginOverlay{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at top, rgba(30,144,255,0.2), transparent),
+    rgba(0,0,0,0.96);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+  text-align:center;
+  padding:24px;
+}
+
+#loginOverlay h2{
+  font-size:26px;
+  margin-bottom:18px;
+  font-weight:600;
+}
+
+#loginOverlay input{
+  width:260px;
+  max-width:90%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:rgba(255,255,255,0.12);
+  color:white;
+  font-size:16px;
+  text-align:center;
+  outline:none;
+}
+
+#loginOverlay button{
+  width:260px;
+  max-width:90%;
+  margin-top:14px;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#1e90ff,#2563eb);
+  color:white;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 10px 30px rgba(30,144,255,0.5);
+  transition:.3s;
+}
+
+#loginOverlay button:hover{
+  transform:translateY(-2px);
+}
+
+/* ===== SCROLL HINT ===== */
+h9{
+  position:fixed;
+  top:14px;
+  right:16px;
+  font-family: "Inter", Arial, sans-serif;
+  font-size:14px;
+  font-weight:500;
+  opacity:.75;
+  z-index:50;
+}
   </style>
 </head>
 <body>
@@ -106,7 +216,7 @@
 </div>
 
 <!-- VIDEO SCROLLER -->
-<h9>📢 Scroll up for more tutorial.</h9>
+<h9>? Scroll up for more tutorial.</h9>
 <div id="slider"></div>
 
 <script>
@@ -121,8 +231,10 @@ const videos = [
   { title: "Lesson 5", url: "https://streamable.com/e/uf4b6k", password: "web4" },
   { title: "Lesson 6", url: "https://streamable.com/e/x5gbl6", password: "web5" },
  { title: "Lesson 7", url: "https://streamable.com/e/oc3sxp?", password: "web6" },
-  { title: "Lesson 8", url: "https://streamable.com/e/xx9uaa?", password: "web7" }
- 
+  { title: "Lesson 8", url: "https://streamable.com/e/xx9uaa?", password: "web7" },
+ {title: "Lesson 9", url: "https://streamable.com/e/v6wo5e?", password: "web8"},
+ {title: "Lesson 10", url: "https://streamable.com/e/wwmzre?" , password: "web9"},
+  {title: "Lesson 11", url: "https://streamable.com/e/pzj1hc?", password: "web10"}
     ];
 
 const slider = document.getElementById("slider");
